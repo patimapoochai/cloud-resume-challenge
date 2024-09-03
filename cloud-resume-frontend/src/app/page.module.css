@@ -1,0 +1,34 @@
+.container {
+}
+
+#a {
+  color: red;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.headerSubtitle {
+  padding: 0 2em 0;
+}
+
+.section {
+  padding: 1em;
+}
+
+.sectionHeader {
+  color: blue;
+  border-bottom: solid;
+  border-color: blue;
+}
+
+.sectionItem {
+  padding: 0 0 1em;
+}
+
+.ul {
+  margin-left: 20px;
+}
