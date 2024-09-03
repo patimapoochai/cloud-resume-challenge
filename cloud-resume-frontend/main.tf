@@ -84,13 +84,13 @@ resource "aws_cloudfront_distribution" "cloud_resume_frontend_distribution" {
     }
   }
 
-  aliases             = var.website_aliases
+  aliases             = concat(var.website_aliases, [var.domain_name])
   default_root_object = "index.html"
 
 }
 
 data "aws_acm_certificate" "patimapoochai_net_certificate" {
-  domain   = "patimapoochai.net"
+  domain   = var.domain_name
   statuses = ["ISSUED"]
 }
 
@@ -106,7 +106,7 @@ resource "aws_cloudfront_origin_access_control" "cloudfront_oac" {
 }
 
 data "aws_route53_zone" "patimapoochai_net_zone" {
-  name = "patimapoochai.net."
+  name = "${var.domain_name}."
 }
 
 resource "aws_route53_record" "non_aliased_records" {

@@ -1,7 +1,7 @@
 variable "bucket-name" {
   type        = string
   description = "The name of the s3 bucket for static website"
-  default     = "patima-cloud-resume-test"
+  default     = "patima-cloud-resume"
 }
 
 variable "website_aliases" {
