@@ -7,7 +7,7 @@ This is a repository containing my implementation of the [Cloud Resume Challenge
 - Front-end site created with Next.js
 - IaC using Terraform
 - Hosted on AWS using S3, Cloudfront, and Route53
-
+![Graph showing the connections of the AWS resources defined in Terraform](https://github.com/patimapoochai/cloud-resume-challenge/blob/78bbd360df699e89a5db162c0b35f6a9ee17fc65/images/graph.png)
 ## Work in Progress
 - GitHub CI/CD pipeline
 - Chunk 2 (soon)
