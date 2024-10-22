@@ -1,5 +1,5 @@
 describe('E2E website', () => {
-  const apiUrl = "https://optv3pe2ce.execute-api.us-east-1.amazonaws.com/default/lambda-tutorial";
+  const apiUrl = "https://resumeapi.patimapoochai.net/visitor";
   it('loads', () => {
     // cy.visit('https://resume.patimapoochai.net');
     cy.visit('http://localhost:3000');
