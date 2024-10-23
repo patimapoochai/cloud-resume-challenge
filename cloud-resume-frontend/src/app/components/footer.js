@@ -31,7 +31,6 @@ export default function Footer() {
           return res.json();
       })
       .then(res => {
-        console.log(res);
         setUniqueViews(res.UniqueVisitors);
       })
   }, []);
