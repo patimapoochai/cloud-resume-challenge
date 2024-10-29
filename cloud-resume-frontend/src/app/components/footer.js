@@ -10,7 +10,7 @@ export default function Footer() {
 
   useEffect(() => {
     fetch(apiUrl, {
-      method: "POST",
+      method: "POST",  // this part is where the server is missing CORS Access-Control-Allow-Origin
     })
       .then(res => {
         if (res.ok)
