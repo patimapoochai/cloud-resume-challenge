@@ -10,7 +10,7 @@ resource "aws_route53_record" "non_aliased_records" {
   type    = "CNAME"
   ttl     = 300
 
-  records = [aws_cloudfront_distribution.cloud_resume_frontend_distribution.domain_name]
+  records = [var.cloudfront_distribution_domain_name]
 }
 
 resource "aws_route53_record" "records" {
@@ -19,8 +19,8 @@ resource "aws_route53_record" "records" {
   type    = "A"
 
   alias {
-    zone_id                = aws_cloudfront_distribution.cloud_resume_frontend_distribution.hosted_zone_id
-    name                   = aws_cloudfront_distribution.cloud_resume_frontend_distribution.domain_name
+    zone_id                = var.cloudfront_distribution_hosted_zone_id
+    name                   = var.cloudfront_distribution_domain_name
     evaluate_target_health = false
   }
 

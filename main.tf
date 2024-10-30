@@ -2,16 +2,16 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 4.16"
+      version = "~> 5.67"
     }
   }
 
-  required_version = ">= 1.2.0"
+  required_version = ">= 1.9.4"
 }
 
 provider "aws" {
-  region  = "us-east-1"
-  profile = var.aws_profile
+  region = "us-east-1"
+  # profile = var.aws_profile
 }
 
 module "route53" {
@@ -32,7 +32,3 @@ module "website_s3_bucket" {
   cloudfront_distribution_arn = module.cloudfront_distribution.distribution_arn
 }
 
-module "frontend" {
-  source          = "./cloud-resume-frontend"
-  website_aliases = ["resume.patimapoochai.net", "www.patimapoochai.net"]
-}
