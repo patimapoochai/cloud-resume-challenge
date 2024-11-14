@@ -31,7 +31,7 @@ export default function Footer() {
           return res.json();
       })
       .then(res => {
-        setUniqueViews(res.UniqueVisitors);
+        setUniqueViews(res.VisitorCount);
       })
   }, []);
 
@@ -39,7 +39,7 @@ export default function Footer() {
     <footer className={styles.footer}>
       <p>View project on <a href={projectUrl}>Github</a></p>
       <p>{views ? `${views} visitors (page views)` : "loading visitors"}</p>
-      <p>{views ? `${uniqueViews} unique visitors` : "loading visitors"}</p>
+      <p>{uniqueViews ? `${uniqueViews} unique visitors` : "loading visitors"}</p>
     </footer>
   );
 }
