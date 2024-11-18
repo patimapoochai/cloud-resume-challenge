@@ -5,6 +5,20 @@ terraform {
       version = "~> 5.67"
     }
   }
+  # s3 backend bootstrap instructions
+  # 1. comment out the backend "s3" block
+  # 2. apply fresh terraform configuration
+  # 3. uncomment backend "s3" block
+  # 4. (development) export AWS_PROFILE=***
+  # 5. run terraform init
+  # s3 backend unboostrap is reverse of above instructions
+  # backend "s3" {
+  #   bucket         = "cloud-res-front-pat-tf-state"
+  #   key            = "global/s3/terraform.tfstate"
+  #   region         = "us-east-1"
+  #   dynamodb_table = "cloud-resume-frontend-terraform-state-lock"
+  #   encrypt        = true
+  # }
 
   required_version = ">= 1.9.4"
 }
@@ -17,6 +31,13 @@ provider "aws" {
       Project = "Cloud-Resume-Frontend"
     }
   }
+}
+
+
+module "terraform-state" {
+  source                   = "./modules/services/terraform-remote-state"
+  s3_state_bucket_name     = "cloud-res-front-pat-tf-state"
+  dynamodb_lock_table_name = "cloud-resume-frontend-terraform-state-lock"
 }
 
 module "route53" {
