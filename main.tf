@@ -33,6 +33,10 @@ provider "aws" {
   }
 }
 
+locals {
+  region = "us-east-1"
+}
+
 
 module "terraform-state" {
   source                   = "./modules/services/terraform-remote-state"
@@ -58,3 +62,12 @@ module "website_s3_bucket" {
   cloudfront_distribution_arn = module.cloudfront_distribution.distribution_arn
 }
 
+module "github_actions_terraform" {
+  source                   = "./modules/services/github-actions-permissions"
+  namespace                = "1"
+  region                   = local.region
+  terraform_lock_table_arn = module.terraform-state.dynamodb_lock_table_arn
+  terraform_s3_state_arn   = module.terraform-state.state_bucket_arn
+  github_repo_url          = "patimapoochai/cloud-resume-backend"
+  website_domain_name      = "patimapoochai.net"
+}
