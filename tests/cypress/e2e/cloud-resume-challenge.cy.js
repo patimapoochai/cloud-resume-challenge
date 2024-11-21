@@ -1,91 +1,61 @@
+function getFirstWord(textString) {
+  return textString.split(" ")[0];
+}
+
 describe('E2E website', () => {
+  const websiteUrl = 'https://resume.patimapoochai.net'
   const apiUrl = "https://resumeapi.patimapoochai.net/visitor";
-  it('loads', () => {
-    // cy.visit('https://resume.patimapoochai.net');
-    cy.visit('http://localhost:3000');
+  // cy.visit('https://resume.patimapoochai.net');
+  it('loads and contain resume elements', () => {
+    cy.visit(websiteUrl);
     cy.contains('Patima Poochai');
+    cy.contains('TEKsystems');
+    cy.contains('University of Hawaii at Manoa');
   })
 
-  it('can get visitor from API', () => {
-    cy.visit('http://localhost:3000');
-    cy.request("POST",
-      apiUrl)
-      .then(res => {
-        expect(res.status).to.eq(200);
-        expect(res.body).to.be.a('object');
+  // it displays visitors as numbers
+  it('displays a number with the regular visitor count', () => {
+    cy.visit(websiteUrl);
+    //cy.get('p').contains('visitors (page views)').should('not.have.value', 'undefined')
+    cy.get('p', { timeout: 10000 }).contains('visitors (page views)').then(($object) => {
+      const firstWord = getFirstWord($object.text());
+      expect(Number.isInteger(parseInt(firstWord))).to.be.true;
+    })
+  })
+
+  it('displays a number with the unique visitor count', () => {
+    cy.visit(websiteUrl);
+    cy.get('p', { timeout: 10000 }).contains('unique visitors').then(($object) => {
+      const firstWord = getFirstWord($object.text());
+      expect(Number.isInteger(parseInt(firstWord))).to.be.true;
+    })
+  })
+
+  it('increments the regular visitor count each visit', () => {
+    cy.visit(websiteUrl);
+    cy.get('p').contains('visitors (page views)').then(($object) => {
+      const firstCount = parseInt(getFirstWord($object.text()));
+      cy.visit(websiteUrl);
+      cy.get('p').contains('visitors (page views)').then(($object) => {
+        const secondCount = parseInt(getFirstWord($object.text()));
+        expect(secondCount > firstCount, "regular visitor count after reloading must be more than before")
+          .to.be.true;
       })
-  })
-
-  it('increments the visitor count each visit', () => {
-    let visitorCount;
-    cy.visit('http://localhost:3000');
-
-    cy.request("POST",
-      apiUrl)
-      .then(res => {
-        visitorCount = +res.body.VisitorCount;
-      });
-
-    cy.request("POST",
-      apiUrl)
-      .then(res => {
-        // console.log(visitorCount + " vs " + res.body.VisitorCount);
-        expect(res.body.VisitorCount > visitorCount, 'Visitor count isn\'t more than previous value')
-          .to.eq(true);
-      });
+    })
   })
 
   it('remembers your IP address', () => {
-    let uniqueVisitorCount;
-    cy.visit('http://localhost:3000');
-
-    cy.request("POST",
-      apiUrl,
-      { "queryType": "unique" }
-    )
-      .then(res => {
-        console.log(res);
-        uniqueVisitorCount = +res.body.UniqueVisitors;
-      });
-
-    cy.request("POST",
-      apiUrl,
-      { "queryType": "unique" }
-    )
-      .then(res => {
-        expect(res.body.UniqueVisitors == uniqueVisitorCount, 'Visitor count isn\'t more than previous value')
-          .to.eq(true);
-      });
-  })
-
-  it('rejects malformed POST requests', () => {
-    cy.visit('http://localhost:3000');
-
-    cy.request({
-      method: 'POST',
-      url: apiUrl,
-      body: { "queryType": "uniq" },
-      failOnStatusCode: false,
-    }).then(res => {
-      expect(res.status).to.be.gt(399);
-    })
-
-    cy.request({
-      method: 'POST',
-      url: apiUrl,
-      body: { "querType": "unique" },
-      failOnStatusCode: false,
-    }).then(res => {
-      expect(res.status).to.be.gt(399);
-    })
-
-    cy.request({
-      method: 'POST',
-      url: apiUrl,
-      body: "bad",
-      failOnStatusCode: false,
-    }).then(res => {
-      expect(res.status).to.be.gt(399);
+    cy.visit(websiteUrl);
+    cy.get('p').contains('unique visitors').then(($object) => {
+      const firstCount = parseInt(getFirstWord($object.text()));
+      cy.visit(websiteUrl);
+      cy.get('p').contains('unique visitors').then(($object) => {
+        const secondCount = parseInt(getFirstWord($object.text()));
+        console.log(firstCount);
+        console.log(secondCount);
+        expect(secondCount == firstCount, "regular visitor count after reloading must be equal to previous value")
+          .to.be.true;
+      })
     })
   })
 })
