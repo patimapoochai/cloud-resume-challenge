@@ -39,3 +39,4 @@ terraform.rc
 
 ## nodejs ##
 debug-stuff/
+cloud-resume-frontend/out/
