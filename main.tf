@@ -12,13 +12,13 @@ terraform {
   # 4. (development) export AWS_PROFILE=***
   # 5. run terraform init
   # s3 backend unboostrap is reverse of above instructions
-  # backend "s3" {
-  #   bucket         = "cloud-res-front-pat-tf-state"
-  #   key            = "global/s3/terraform.tfstate"
-  #   region         = "us-east-1"
-  #   dynamodb_table = "cloud-resume-frontend-terraform-state-lock"
-  #   encrypt        = true
-  # }
+  backend "s3" {
+    bucket         = "cloud-res-front-pat-tf-state"
+    key            = "global/s3/terraform.tfstate"
+    region         = "us-east-1"
+    dynamodb_table = "cloud-resume-frontend-terraform-state-lock"
+    encrypt        = true
+  }
 
   required_version = ">= 1.9.4"
 }
@@ -72,6 +72,5 @@ module "github_actions_terraform" {
   website_domain_name         = "patimapoochai.net"
   cloudfront_distribution_arn = module.cloudfront_distribution.distribution_arn
   distribution_oac_id         = module.cloudfront_distribution.oac_id
-  hosted_zone_arn             = module.cloudfront_distribution.hosted_zone_arn
   frontend_website_bucket_arn = module.website_s3_bucket.arn
 }

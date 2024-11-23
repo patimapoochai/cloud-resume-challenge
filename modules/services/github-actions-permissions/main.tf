@@ -57,7 +57,7 @@ data "aws_iam_policy_document" "terraform_create" { # cycle here?
       "route53:GetHostedZone"
     ]
     resources = [
-      var.hosted_zone_arn
+      data.aws_route53_zone.patimapoochai_net_zone.arn
     ]
   }
 

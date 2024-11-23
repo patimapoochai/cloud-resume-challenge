@@ -31,11 +31,6 @@ variable "frontend_website_bucket_arn" {
   description = "ARN of cloud resume site ucket"
 }
 
-variable "hosted_zone_arn" {
-  type        = string
-  description = "ARN of the route53 hosted zone"
-}
-
 variable "distribution_oac_id" {
   type        = string
   description = "distribution id"
