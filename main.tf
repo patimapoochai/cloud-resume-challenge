@@ -63,11 +63,15 @@ module "website_s3_bucket" {
 }
 
 module "github_actions_terraform" {
-  source                   = "./modules/services/github-actions-permissions"
-  namespace                = "1"
-  region                   = local.region
-  terraform_lock_table_arn = module.terraform-state.dynamodb_lock_table_arn
-  terraform_s3_state_arn   = module.terraform-state.state_bucket_arn
-  github_repo_url          = "patimapoochai/cloud-resume-challenge"
-  website_domain_name      = "patimapoochai.net"
+  source                      = "./modules/services/github-actions-permissions"
+  namespace                   = "1"
+  region                      = local.region
+  terraform_lock_table_arn    = module.terraform-state.dynamodb_lock_table_arn
+  terraform_s3_state_arn      = module.terraform-state.state_bucket_arn
+  github_repo_url             = "patimapoochai/cloud-resume-challenge"
+  website_domain_name         = "patimapoochai.net"
+  cloudfront_distribution_arn = module.cloudfront_distribution.distribution_arn
+  distribution_oac_id         = module.cloudfront_distribution.oac_id
+  hosted_zone_arn             = module.cloudfront_distribution.hosted_zone_arn
+  frontend_website_bucket_arn = module.website_s3_bucket.arn
 }

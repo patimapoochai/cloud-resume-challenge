@@ -25,3 +25,23 @@ variable "github_repo_url" {
   type        = string
   description = "ACCOUNT/REPO_NAME, use as repo:ACCOUNT/REPO_NAME:ref:refs/heads/main"
 }
+
+variable "frontend_website_bucket_arn" {
+  type        = string
+  description = "ARN of cloud resume site ucket"
+}
+
+variable "hosted_zone_arn" {
+  type        = string
+  description = "ARN of the route53 hosted zone"
+}
+
+variable "distribution_oac_id" {
+  type        = string
+  description = "distribution id"
+}
+
+variable "cloudfront_distribution_arn" {
+  type        = string
+  description = "ARN of cloudfront distribution"
+}

@@ -13,6 +13,10 @@ data "aws_acm_certificate" "site_cert" {
 
 data "aws_caller_identity" "current" {}
 
+data "aws_cloudfront_cache_policy" "cachingoptimized" {
+  name = "Managed-CachingOptimized"
+}
+
 data "aws_iam_policy_document" "terraform_create" { # cycle here?
   version = "2012-10-17"
 
@@ -22,7 +26,11 @@ data "aws_iam_policy_document" "terraform_create" { # cycle here?
     actions = [
       "sts:GetCallerIdentity",
       "route53:ListHostedZones",
+      "cloudfront:ListCachePolicies",
       "acm:ListCertificates",
+      "iam:ListOpenIDConnectProviders",
+      "cloudfront:CreateOriginAccessControl",
+      "cloudfront:CreateDistributionWithTags"
     ]
     resources = [
       "*"
@@ -31,10 +39,38 @@ data "aws_iam_policy_document" "terraform_create" { # cycle here?
 
   statement {
     actions = [
+      "s3:Get*",
+      "s3:Put*",
+      "s3:ListBucket",
+      "s3:DeleteBucket",
+      "s3:DeleteBucketPolicy",
+      "s3:CreateBucket"
+    ]
+    resources = [
+      var.terraform_s3_state_arn,
+      var.frontend_website_bucket_arn
+    ]
+  }
+
+  statement {
+    actions = [
       "route53:GetHostedZone"
     ]
     resources = [
-      data.aws_route53_zone.patimapoochai_net_zone.arn
+      var.hosted_zone_arn
+    ]
+  }
+
+  statement {
+    actions = [
+      "iam:GetPolicy*",
+      "iam:ListPolicy*",
+      "iam:DeletePolicy",
+      "iam:CreatePolicy"
+    ]
+    resources = [
+      aws_iam_policy.github_oidc_safety.arn,
+      # aws_iam_policy.github_actions_terraform.arn # this will cause a cycle
     ]
   }
 
@@ -50,7 +86,8 @@ data "aws_iam_policy_document" "terraform_create" { # cycle here?
 
   statement {
     actions = [
-      "route53:ListTagsForResource"
+      "route53:ListTagsForResource",
+      "route53:ListResourceRecordSets"
     ]
     resources = [
       "arn:aws:route53:::healthcheck/*",
@@ -60,76 +97,19 @@ data "aws_iam_policy_document" "terraform_create" { # cycle here?
 
   statement {
     actions = [
-      "acm:ListTagsForCertificate"
+      "cloudfront:GetCachePolicy"
     ]
     resources = [
-      # "arn:aws:acm:us-east-1:879381244858:certificate/*"
-      "arn:aws:acm:${var.region}:${data.aws_caller_identity.current.account_id}:certificate/*"
-    ]
-  }
-
-  statement {
-    sid = "CreateDynamodbTable"
-    actions = [
-      "dynamodb:CreateTable"
-    ]
-    resources = [
-      "arn:aws:dynamodb:${var.region}:${data.aws_caller_identity.current.account_id}:*"
-    ]
-  }
-
-  statement {
-    sid = "TerraformLockTableItemAccess"
-    actions = [
-      "dynamodb:*",
-    ]
-    resources = [
-      "${var.terraform_lock_table_arn}"
-    ]
-  }
-
-  statement {
-    sid = "TerraformLockStateBucketObjectAccess"
-    actions = [
-      "s3:*"
-    ]
-    resources = [
-      "${var.terraform_s3_state_arn}/*"
+      "arn:aws:cloudfront::${data.aws_caller_identity.current.account_id}:cache-policy/${data.aws_cloudfront_cache_policy.cachingoptimized.id}"
     ]
   }
 
   statement {
     actions = [
-      "apigateway:*"
+      "iam:GetOpenIDConnectProvider"
     ]
     resources = [
-      "arn:aws:apigateway:${var.region}::*"
-      #"arn:aws:apigateway:${var.region}::/domainnames",
-      #"arn:aws:apigateway:${var.region}::/restapis"
-    ]
-    condition {
-      test     = "StringEquals"
-      variable = "aws:ResourceTag/Project"
-      values   = ["Cloud-Resume-Backend"]
-    }
-  }
-
-  statement {
-    actions = [
-      "s3:*"
-    ]
-    resources = [
-      var.terraform_s3_state_arn
-      #var.terraform_s3_cloud_resume_pat_state
-    ]
-  }
-
-  statement {
-    actions = [
-      "iam:CreateOpenIDConnectProvider"
-    ]
-    resources = [
-      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/*"
+      data.aws_iam_openid_connect_provider.github.arn
     ]
   }
 
@@ -138,186 +118,71 @@ data "aws_iam_policy_document" "terraform_create" { # cycle here?
       "iam:GetRole",
       "iam:ListRolePolicies",
       "iam:ListAttachedRolePolicies",
-      "iam:AttachRolePolicy",
-      "iam:TagRole"
+      "iam:DetachRolePolicy",
+      "iam:ListInstanceProfilesForRole",
+      "iam:DeleteRole",
+      "iam:CreateRole",
+      "iam:AttachRolePolicy"
     ]
     resources = [
-      # was aws_iam_role.github_actions_terraform
-      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:*"
-    ]
-    condition {
-      test     = "StringEquals"
-      variable = "aws:ResourceTag/Project"
-      values   = ["Cloud-Resume-Backend"]
-    }
-  }
-
-  statement {
-    actions = [
-      "iam:CreatePolicy",
-      "iam:GetPolicy",
-      "iam:GetPolicyVersion",
-      "iam:TagPolicy"
-    ]
-    resources = [
-      aws_iam_policy.github_oidc_safety.arn
-      #var.GithubOIDCSafety_policy_arn"aws_iam_policy" "github_oidc_safety"
-    ]
-  }
-
-
-  statement {
-    actions = [
-      "iam:GetOpenIDConnectProvider",
-      "iam:TagOpenIDConnectProvider"
-    ]
-    resources = [
-      data.aws_iam_openid_connect_provider.github.arn
-      # aws_iam_openid_connect_provider.github.arn
-      #var.OIDC_provider_tokens_actions_githubusercontent "aws_iam_openid_connect_provider" "github"
+      aws_iam_role.github_actions_terraform.arn
     ]
   }
 
   statement {
     actions = [
-      "iam:Get*",
-      "iam:List*",
-      "iam:Create*",
-      "iam:Delete*",
-      "iam:Update*",
-      "iam:Attach*",
-      "iam:Tag*",
-      "iam:Untag*",
+      "acm:ListTagsForCertificate"
     ]
     resources = [
-      "*" # was aws_iam_role.github_actions_terraform 
-    ]
-    condition {
-      test     = "StringEquals"
-      variable = "aws:ResourceTag/Project"
-      values   = ["Cloud-Resume-Backend"]
-    }
-  }
-
-  statement {
-    actions = [
-      "apigateway:GET"
-    ]
-    resources = [
-      "arn:aws:apigateway:${var.region}::/domainnames/*"
+      "arn:aws:acm:us-east-1:${data.aws_caller_identity.current.account_id}:certificate/*"
     ]
   }
 
   statement {
     actions = [
-      "apigateway:GET"
+      "s3:GetObject*",
+      "s3:DeleteObject",
+      "s3:PutObject"
     ]
     resources = [
-      "arn:aws:apigateway:${var.region}::/apis/*/integrations/*"
+      "${var.frontend_website_bucket_arn}/*"
     ]
   }
 
   statement {
     actions = [
-      "apigateway:POST"
+      "cloudfront:GetOriginAccessControl",
+      "cloudfront:DeleteOriginAccessControl"
     ]
     resources = [
-      "arn:aws:apigateway:${var.region}::/apis/*/deployments"
+      "arn:aws:cloudfront::${data.aws_caller_identity.current.account_id}:origin-access-control/${var.distribution_oac_id}",
+      "arn:aws:cloudfront::${data.aws_caller_identity.current.account_id}:origin-access-control/E1QXFM0PHHS1LU", // what is this?
+      "arn:aws:cloudfront::${data.aws_caller_identity.current.account_id}:origin-access-control/E3N39S793IBFH"
     ]
   }
 
   statement {
     actions = [
-      "apigateway:GET"
+      "cloudfront:GetDistribution",
+      "cloudfront:ListTagsForResource",
+      "cloudfront:UpdateDistribution",
+      "cloudfront:DeleteDistribution"
     ]
     resources = [
-      "arn:aws:apigateway:${var.region}::/apis/*/deployments/*"
+      var.cloudfront_distribution_arn,
+      "arn:aws:cloudfront::879381244858:distribution/EVPIUBUX170DL"
     ]
   }
 
   statement {
     actions = [
-      "apigateway:POST"
+      "route53:GetChange"
     ]
     resources = [
-      "arn:aws:apigateway:${var.region}::/apis/*/stages"
-    ]
-  }
-
-  statement {
-    actions = [
-      "apigateway:GET"
-    ]
-    resources = [
-      "arn:aws:apigateway:${var.region}::/apis/*/stages"
-    ]
-  }
-
-  statement {
-    actions = [
-      "apigateway:POST"
-    ]
-    resources = [
-      "arn:aws:apigateway:${var.region}::/usageplans"
-    ]
-  }
-
-  statement {
-    actions = [
-      "dynamodb:CreateTable",
-    ]
-    resources = ["*"]
-    condition {
-      test     = "StringEquals"
-      variable = "aws:ResourceTag/Project"
-      values   = ["Cloud-Resume-Backend"]
-    }
-  }
-
-  # statement {
-  #   actions = [
-  #     "route53:GetChange"
-  #   ]
-  #   resources = [
-  #     "arn:aws:route53:::change/C06843121UC52O6A6QE4V" # WTF is this?
-  #   ]
-  # }
-
-  statement {
-    actions = [
-      "route53:ListResourceRecordSets"
-    ]
-    resources = [
-      "arn:aws:route53:::hostedzone/*"
-    ]
-  }
-
-  statement {
-    actions = [
-      "logs:*"
-    ]
-    resources = [
-      "arn:aws:logs:${var.region}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/*:*"
-    ]
-    condition {
-      test     = "StringEquals"
-      variable = "aws:ResourceTag/Project"
-      values   = ["Cloud-Resume-Backend"]
-    }
-  }
-
-  statement {
-    actions = [
-      "logs:Describe*",
-      "logs:List*",
-      "logs:Create*",
-      "logs:Delete*",
-      "logs:Update*",
-      "logs:Tag*",
-      "logs:Untag*",
-    ]
-    resources = [
-      "*"
+      "arn:aws:route53:::change/C096490527OIHEQI3FW3D",
+      "arn:aws:route53:::change/C06167491TJ2EX1S6LLSC",
+      "arn:aws:route53:::change/C10286161LEOXNJ027SS9",
+      "arn:aws:route53:::change/C05634672BL8A5CZWYXHF" // what are these?
     ]
   }
 
@@ -330,6 +195,7 @@ resource "aws_iam_policy" "github_actions_terraform" { # cycle here
   policy = data.aws_iam_policy_document.terraform_create.json
 }
 
+# Already provided?
 # resource "aws_iam_openid_connect_provider" "github" {
 #   url = "https://${local.github_oidc_url}"
 #   client_id_list = [
