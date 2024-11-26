@@ -70,7 +70,10 @@ data "aws_iam_policy_document" "terraform_create" { # cycle here?
     actions = [
       "dynamodb:PutItem",
       "dynamodb:GetItem",
-      "dynamodb:DeleteItem"
+      "dynamodb:DeleteItem",
+      "dynamodb:List*",
+      "dynamodb:Tag*",
+      "dynamodb:Describe*"
     ]
     resources = [
       var.terraform_lock_table_arn
