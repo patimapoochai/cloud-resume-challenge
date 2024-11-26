@@ -203,6 +203,16 @@ data "aws_iam_policy_document" "terraform_create" { # cycle here?
       # aws_iam_policy.github_actions_terraform.arn # this will cause a cycle
     ]
   }
+
+  statement {
+    sid = "RandomSelfReferentialIAMPermissions"
+    actions = [
+      "iam:GetPolicy"
+    ]
+    resources = [
+      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/*"
+    ]
+  }
 }
 
 resource "aws_iam_policy" "github_actions_terraform" { # cycle here
@@ -244,8 +254,10 @@ resource "aws_iam_policy" "github_actions_policy_management" {
           "iam:DeletePolicy",
           "iam:CreatePolicy"
         ]
-        Effect   = "Allow"
-        Resource = "${aws_iam_policy.github_actions_terraform.arn}"
+        Effect = "Allow"
+        Resource = [
+          "${aws_iam_policy.github_actions_terraform.arn}",
+        ]
       }
     ]
   })
