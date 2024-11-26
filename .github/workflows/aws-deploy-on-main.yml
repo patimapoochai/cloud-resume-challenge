@@ -28,6 +28,8 @@ jobs:
           audience: sts.amazonaws.com
           aws-region: us-east-1
           role-to-assume: ${{ secrets.AWS_ROLE }}
+      - name: DEBUG role print
+        run: aws sts get-caller-identity
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
