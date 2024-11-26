@@ -91,19 +91,6 @@ data "aws_iam_policy_document" "terraform_create" { # cycle here?
 
   statement {
     actions = [
-      "iam:GetPolicy*",
-      "iam:ListPolicy*",
-      "iam:DeletePolicy",
-      "iam:CreatePolicy"
-    ]
-    resources = [
-      aws_iam_policy.github_oidc_safety.arn,
-      # aws_iam_policy.github_actions_terraform.arn # this will cause a cycle
-    ]
-  }
-
-  statement {
-    actions = [
       "acm:DescribeCertificate",
       "acm:GetCertificate"
     ]
@@ -204,6 +191,18 @@ data "aws_iam_policy_document" "terraform_create" { # cycle here?
     ]
   }
 
+  statement {
+    actions = [
+      "iam:GetPolicy*",
+      "iam:ListPolicy*",
+      "iam:DeletePolicy",
+      "iam:CreatePolicy"
+    ]
+    resources = [
+      aws_iam_policy.github_oidc_safety.arn,
+      # aws_iam_policy.github_actions_terraform.arn # this will cause a cycle
+    ]
+  }
 }
 
 resource "aws_iam_policy" "github_actions_terraform" { # cycle here
@@ -212,17 +211,6 @@ resource "aws_iam_policy" "github_actions_terraform" { # cycle here
 
   policy = data.aws_iam_policy_document.terraform_create.json
 }
-
-# Already provided?
-# resource "aws_iam_openid_connect_provider" "github" {
-#   url = "https://${local.github_oidc_url}"
-#   client_id_list = [
-#     "sts.amazonaws.com"
-#   ]
-#   thumbprint_list = [
-#     "d89e3bd43d5d909b47a18977aa9d5ce36cee184c"
-#   ]
-# }
 
 data "aws_iam_openid_connect_provider" "github" {
   url = "https://${local.github_oidc_url}"
@@ -240,6 +228,27 @@ data "aws_iam_policy_document" "oidc_safety" {
       "*",
     ]
   }
+}
+
+
+resource "aws_iam_policy" "github_actions_policy_management" {
+  name        = "GithubActions_PolicyManagement_${var.namespace}"
+  description = "This is here just so terraform will stop complaning about circular dependencies for github actions permissions management"
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "iam:GetPolicy*",
+          "iam:ListPolicy*",
+          "iam:DeletePolicy",
+          "iam:CreatePolicy"
+        ]
+        Effect   = "Allow"
+        Resource = "${aws_iam_policy.github_actions_terraform.arn}"
+      }
+    ]
+  })
 }
 
 resource "aws_iam_policy" "github_oidc_safety" {
@@ -291,3 +300,20 @@ resource "aws_iam_role_policy_attachment" "github_actions_terraform_deployment" 
   role       = aws_iam_role.github_actions_terraform.name
   policy_arn = aws_iam_policy.github_actions_terraform.arn
 }
+
+resource "aws_iam_role_policy_attachment" "github_actions_terraform_oopsies" {
+  role       = aws_iam_role.github_actions_terraform.name
+  policy_arn = aws_iam_policy.github_actions_policy_management.arn
+}
+
+# Already provided?
+# resource "aws_iam_openid_connect_provider" "github" {
+#   url = "https://${local.github_oidc_url}"
+#   client_id_list = [
+#     "sts.amazonaws.com"
+#   ]
+#   thumbprint_list = [
+#     "d89e3bd43d5d909b47a18977aa9d5ce36cee184c"
+#   ]
+# }
+
