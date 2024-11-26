@@ -44,8 +44,7 @@ data "aws_iam_policy_document" "terraform_create" { # cycle here?
       "s3:ListBucket",
       "s3:DeleteBucket",
       "s3:DeleteBucketPolicy",
-      "s3:CreateBucket",
-      "s3:HeadObject"
+      "s3:CreateBucket"
     ]
     resources = [
       var.terraform_s3_state_arn,
@@ -55,12 +54,14 @@ data "aws_iam_policy_document" "terraform_create" { # cycle here?
 
   statement {
     actions = [
-      "s3:GetObject*",
+      "s3:Get*",
+      "s3:Put*",
       "s3:DeleteObject",
-      "s3:PutObject",
       "s3:HeadObject"
     ]
     resources = [
+      "${var.terraform_s3_state_arn}/*",
+      "${var.frontend_website_bucket_arn}/*",
       "${var.frontend_website_bucket_arn}/*"
     ]
   }
