@@ -68,6 +68,17 @@ data "aws_iam_policy_document" "terraform_create" { # cycle here?
 
   statement {
     actions = [
+      "dynamodb:PutItem",
+      "dynamodb:GetItem",
+      "dynamodb:DeleteItem"
+    ]
+    resources = [
+      var.terraform_lock_table_arn
+    ]
+  }
+
+  statement {
+    actions = [
       "route53:GetHostedZone"
     ]
     resources = [
