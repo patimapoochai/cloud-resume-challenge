@@ -2,6 +2,10 @@ output "distribution_arn" {
   value = aws_cloudfront_distribution.cloud_resume_frontend_distribution.arn
 }
 
+output "distribution_id" {
+  value = aws_cloudfront_distribution.cloud_resume_frontend_distribution.id
+}
+
 output "hosted_zone_id" {
   value = aws_cloudfront_distribution.cloud_resume_frontend_distribution.hosted_zone_id
 }
