@@ -171,7 +171,8 @@ data "aws_iam_policy_document" "terraform_create" { # cycle here?
       "cloudfront:GetDistribution",
       "cloudfront:ListTagsForResource",
       "cloudfront:UpdateDistribution",
-      "cloudfront:DeleteDistribution"
+      "cloudfront:DeleteDistribution",
+      "cloudfront:CreateInvalidation"
     ]
     resources = [
       var.cloudfront_distribution_arn,
@@ -222,6 +223,7 @@ data "aws_iam_policy_document" "terraform_create" { # cycle here?
       values   = ["Cloud-Resume-Frontend"]
     }
   }
+
 }
 
 resource "aws_iam_policy" "github_actions_terraform" { # cycle here
