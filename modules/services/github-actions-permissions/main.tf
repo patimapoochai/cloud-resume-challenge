@@ -219,7 +219,7 @@ data "aws_iam_policy_document" "terraform_create" { # cycle here?
     condition {
       test     = "StringEquals"
       variable = "aws:ResourceTag/Project"
-      values   = ["Cloud-Resume-Backend"]
+      values   = ["Cloud-Resume-Frontend"]
     }
   }
 }
