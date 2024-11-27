@@ -207,11 +207,20 @@ data "aws_iam_policy_document" "terraform_create" { # cycle here?
   statement {
     sid = "RandomSelfReferentialIAMPermissions"
     actions = [
-      "iam:GetPolicy"
+      "iam:GetPolicy",
+      "iam:GetPolicyVersion",
+      "iam:ListPolicyVersion",
+      "iam:DeletePolicyVersion",
+      "iam:CreatePolicyVersion"
     ]
     resources = [
       "arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/*"
     ]
+    condition {
+      test     = "StringEquals"
+      variable = "aws:ResourceTag/Project"
+      values   = ["Cloud-Resume-Backend"]
+    }
   }
 }
 
@@ -252,7 +261,10 @@ resource "aws_iam_policy" "github_actions_policy_management" {
           "iam:GetPolicy*",
           "iam:ListPolicy*",
           "iam:DeletePolicy",
-          "iam:CreatePolicy"
+          "iam:CreatePolicy",
+          "iam:ListPolicyVersion",
+          "iam:DeletePolicyVersion",
+          "iam:CreatePolicyVersion"
         ]
         Effect = "Allow"
         Resource = [
