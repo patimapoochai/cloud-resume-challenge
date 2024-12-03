@@ -1,5 +1,7 @@
 on:
-  push:
+  pull_request:
+    types:
+    - opened
     branches:
       - main
   workflow_dispatch:
