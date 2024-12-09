@@ -40,3 +40,4 @@ terraform.rc
 ## nodejs ##
 debug-stuff/
 cloud-resume-frontend/out/
+tests/cypress/screenshots

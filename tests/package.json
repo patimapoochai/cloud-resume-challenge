@@ -4,7 +4,8 @@
   "description": "Tests for cloud resume project",
   "main": "index.js",
   "scripts": {
-    "cy:open": "cypress open"
+    "cy:open": "cypress open",
+    "e2e:firefox": "cypress run --browser firefox"
   },
   "author": "",
   "license": "ISC",
