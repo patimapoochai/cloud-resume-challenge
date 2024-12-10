@@ -12,14 +12,14 @@ terraform {
   # 4. (development) export AWS_PROFILE=***
   # 5. run terraform init
   # s3 backend unboostrap is reverse of above instructions
-  # backend "s3" {
-  #   bucket         = "cloud-res-front-pat-tf-state"
-  #   key            = "global/s3/terraform.tfstate"
-  #   region         = "us-east-1"
-  #   dynamodb_table = "cloud-resume-frontend-terraform-state-lock"
-  #   encrypt        = true
-  # }
-  #
+  backend "s3" {
+    bucket         = "cloud-res-front-pat-tf-state"
+    key            = "global/s3/terraform.tfstate"
+    region         = "us-east-1"
+    dynamodb_table = "cloud-resume-frontend-terraform-state-lock"
+    encrypt        = true
+  }
+
   required_version = ">= 1.9.4"
 }
 
