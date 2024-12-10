@@ -52,6 +52,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Initialize npm
-        run: npm init
+        run: npm install
       - name: Run tets
         run: npm run e2e:firefox
