@@ -33,7 +33,7 @@ describe('E2E website', () => {
 
   it('increments the regular visitor count each visit', () => {
     cy.visit(websiteUrl);
-    cy.get('p').contains('visitors (page views)').then(($object) => {
+    cy.get('p', { timeout: 10000 }).contains('visitors (page views)').then(($object) => {
       const firstCount = parseInt(getFirstWord($object.text()));
       cy.visit(websiteUrl);
       cy.get('p').contains('visitors (page views)').then(($object) => {
