@@ -13,5 +13,5 @@ This is a repository containing my front end code for the [Cloud Resume Challeng
 - CI/CD with Github Actions
 
 ## See Also
-View the blog post of the challenge ![here](https://dev.to/unfiled4897/creating-a-nextjs-aws-site-for-the-cloud-resume-challenge-5121)
+View the blog post of the challenge [here](https://dev.to/unfiled4897/creating-a-nextjs-aws-site-for-the-cloud-resume-challenge-5121).
 
